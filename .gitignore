@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# Environment variables
+.env
+
 # Expo
 .expo/
 dist/
@@ -39,3 +42,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+
+# Documentation
+TYPESCRIPT_MIGRATION.md
+TYPESCRIPT_SETUP.md
