@@ -21,26 +21,25 @@ const userAPI = {
     return response.data.data;
   },
 
-  // Get user preferences
-  async getPreferences(): Promise<UserPreferences> {
-    const response = await apiClient.get<ApiResponse<UserPreferences>>('/api/users/preferences');
-    if (!response.data.data) {
-      throw new Error('Preferences not found');
+  // Get user preferences - backend may not implement GET; return empty/default on 404/405
+  async getPreferences(): Promise<Partial<UserPreferences> | null> {
+    try {
+      const response = await apiClient.get<ApiResponse<UserPreferences>>('/api/users/preferences');
+      return response.data.data || null;
+    } catch (err: any) {
+      if (err.message && (err.message.includes('Method Not Allowed') || err.message.includes('Not Found'))) {
+        return null;
+      }
+      throw err;
     }
-    return response.data.data;
   },
 
-  // Update user preferences
-  async updatePreferences(preferences: Partial<UserPreferences>): Promise<UserPreferences> {
-    const response = await apiClient.put<ApiResponse<UserPreferences>>(
-      '/api/users/preferences',
-      preferences
-    );
-    if (!response.data.data) {
-      throw new Error('Failed to update preferences');
-    }
-    return response.data.data;
+
+  // Update user preferences (backend: POST /api/users/preferences returns MessageResponse)
+  async updatePreferences(preferences: Partial<UserPreferences>): Promise<void> {
+    await apiClient.post('/api/users/preferences', preferences);
   },
+
 
   // Get active sessions
   async getSessions(): Promise<DeviceSession[]> {
@@ -53,15 +52,16 @@ const userAPI = {
     await apiClient.delete(`/api/users/sessions/${sessionId}`);
   },
 
-  // Track user location
+  // Track user location (backend: /api/users/locations/track)
   async trackLocation(locationData: {
     latitude: number;
     longitude: number;
-    accuracy: number;
-    deviceIP: string;
+    accuracy_meters?: number;
+    activity_type?: string;
   }): Promise<void> {
-    await apiClient.post('/api/users/location', locationData);
+    await apiClient.post('/api/users/locations/track', locationData);
   },
+
 
   // Delete account
   async deleteAccount(): Promise<void> {

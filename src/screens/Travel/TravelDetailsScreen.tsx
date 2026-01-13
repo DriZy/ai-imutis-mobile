@@ -50,11 +50,19 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
     );
   }
 
-  const mapRegion = {
-    latitude: (trip.route.originCoordinates.latitude + trip.route.destinationCoordinates.latitude) / 2,
-    longitude: (trip.route.originCoordinates.longitude + trip.route.destinationCoordinates.longitude) / 2,
+  const originCoords = trip.route.originCoordinates;
+  const destCoords = trip.route.destinationCoordinates;
+
+  const mapRegion = originCoords && destCoords ? {
+    latitude: (originCoords.latitude + destCoords.latitude) / 2,
+    longitude: (originCoords.longitude + destCoords.longitude) / 2,
     latitudeDelta: 0.5,
     longitudeDelta: 0.5,
+  } : {
+    latitude: trip.route.origin.coordinates.latitude,
+    longitude: trip.route.origin.coordinates.longitude,
+    latitudeDelta: 1,
+    longitudeDelta: 1,
   };
 
   return (
@@ -77,7 +85,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               </View>
               <View style={styles.routeInfo}>
                 <Text style={styles.routeLabel}>From</Text>
-                <Text style={styles.routeName}>{trip.route.origin}</Text>
+                <Text style={styles.routeName}>{trip.route.origin.name}</Text>
               </View>
             </View>
 
@@ -89,7 +97,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               </View>
               <View style={styles.routeInfo}>
                 <Text style={styles.routeLabel}>To</Text>
-                <Text style={styles.routeName}>{trip.route.destination}</Text>
+                <Text style={styles.routeName}>{trip.route.destination.name}</Text>
               </View>
             </View>
           </View>
@@ -98,21 +106,27 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         {/* Map */}
         <View style={styles.mapContainer}>
           <MapView style={styles.map} region={mapRegion} scrollEnabled={false}>
-            <Marker
-              coordinate={trip.route.originCoordinates}
-              title={trip.route.origin}
-              pinColor={theme.colors.primary.main}
-            />
-            <Marker
-              coordinate={trip.route.destinationCoordinates}
-              title={trip.route.destination}
-              pinColor={theme.colors.secondary.main}
-            />
-            <Polyline
-              coordinates={[trip.route.originCoordinates, trip.route.destinationCoordinates]}
-              strokeColor={theme.colors.primary.main}
-              strokeWidth={3}
-            />
+            {originCoords && (
+              <Marker
+                coordinate={originCoords as any}
+                title={trip.route.origin.name}
+                pinColor={theme.colors.primary.main}
+              />
+            )}
+            {destCoords && (
+              <Marker
+                coordinate={destCoords as any}
+                title={trip.route.destination.name}
+                pinColor={theme.colors.secondary.main}
+              />
+            )}
+            {originCoords && destCoords && (
+              <Polyline
+                coordinates={[originCoords as any, destCoords as any]}
+                strokeColor={theme.colors.primary.main}
+                strokeWidth={3}
+              />
+            )}
           </MapView>
         </View>
 
@@ -162,7 +176,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
                 <Text style={styles.vehicleReg}>{trip.vehicleRegistration}</Text>
               </View>
               <View style={styles.seatsInfo}>
-                <Ionicons name="seat" size={24} color={theme.colors.primary.main} />
+                <Ionicons name={'seat' as any} size={24} color={theme.colors.primary.main} />
                 <Text style={styles.seatsText}>{trip.availableSeats}/{trip.totalSeats}</Text>
               </View>
             </View>
@@ -188,7 +202,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         </View>
 
         {/* AI Departure Prediction */}
-        {trip.depturePrediction && (
+        {trip.departurePrediction && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>AI Departure Prediction</Text>
             
@@ -199,24 +213,24 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               <View style={styles.predictionContent}>
                 <Text style={styles.predictionTitle}>Estimated Departure</Text>
                 <Text style={styles.predictionTime}>
-                  {formatTime(new Date(trip.depturePrediction.estimatedDepartureTime))}
+                  {formatTime(new Date(trip.departurePrediction.estimatedDepartureTime))}
                 </Text>
                 <View style={styles.confidenceBar}>
                   <View
                     style={[
                       styles.confidenceFill,
-                      { width: `${trip.depturePrediction.confidence * 100}%` },
+                      { width: `${trip.departurePrediction.confidence * 100}%` },
                     ]}
                   />
                 </View>
                 <Text style={styles.confidenceText}>
-                  {Math.round(trip.depturePrediction.confidence * 100)}% confidence
+                  {Math.round(trip.departurePrediction.confidence * 100)}% confidence
                 </Text>
               </View>
             </View>
 
             <View style={styles.factorsContainer}>
-              {Object.entries(trip.depturePrediction.factors).map(([key, value]) => (
+              {Object.entries(trip.departurePrediction.factors).map(([key, value]) => (
                 <View key={key} style={styles.factorItem}>
                   <Text style={styles.factorLabel}>{key.replace(/([A-Z])/g, ' $1').trim()}</Text>
                   <Text style={styles.factorValue}>{value}</Text>

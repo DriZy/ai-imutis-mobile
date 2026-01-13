@@ -32,7 +32,7 @@ export default function SessionManagerScreen({ navigation }: Props): React.JSX.E
     try {
       setLoading(true);
       const response = await userAPI.getSessions();
-      setSessions(response.sessions);
+      setSessions(response);
     } catch (error) {
       console.error('Error loading sessions:', error);
     } finally {

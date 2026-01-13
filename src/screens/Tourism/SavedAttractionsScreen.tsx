@@ -30,8 +30,10 @@ export default function SavedAttractionsScreen({ navigation }: Props): React.JSX
   const loadSavedAttractions = async () => {
     try {
       setLoading(true);
-      const response = await tourismAPI.getSavedAttractions();
-      setSavedAttractions(response.items);
+      const saved = await tourismAPI.getSavedAttractions();
+      // Fetch full attraction details for each saved attraction
+      const attractions = await Promise.all(saved.map(sa => tourismAPI.getAttractionDetails(sa.attractionId)));
+      setSavedAttractions(attractions);
     } catch (error) {
       console.error('Error loading saved attractions:', error);
     } finally {
@@ -47,7 +49,7 @@ export default function SavedAttractionsScreen({ navigation }: Props): React.JSX
 
   const handleRemoveSaved = async (attractionId: string) => {
     try {
-      await tourismAPI.unsaveAttraction(attractionId);
+      await tourismAPI.removeSavedAttraction(attractionId);
       setSavedAttractions(prev => prev.filter(a => a.id !== attractionId));
     } catch (error) {
       console.error('Error removing saved attraction:', error);

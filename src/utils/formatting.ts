@@ -61,3 +61,6 @@ export const formatDeviceIP = (ip: string): string => {
   }
   return ip;
 };
+
+// Re-export date/time formatting utilities
+export { formatTime, formatDateTime } from './dateTime';

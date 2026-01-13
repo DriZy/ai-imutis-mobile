@@ -17,7 +17,7 @@ import { Notification } from '../../types';
 import notificationAPI from '../../services/api/notificationAPI';
 import { formatDateTime } from '../../utils/formatting';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Notifications'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'NotificationsScreen'>;
 
 export default function NotificationsScreen({ navigation }: Props): React.JSX.Element {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -51,7 +51,7 @@ export default function NotificationsScreen({ navigation }: Props): React.JSX.El
       await notificationAPI.markAsRead(notificationId);
       setNotifications(
         notifications.map(n =>
-          n.id === notificationId ? { ...n, isRead: true } : n
+          n.id === notificationId ? { ...n, read: true } : n
         )
       );
     } catch (error) {
@@ -71,7 +71,8 @@ export default function NotificationsScreen({ navigation }: Props): React.JSX.El
   const handleMarkAllAsRead = async () => {
     try {
       await notificationAPI.markAllAsRead();
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
@@ -133,7 +134,7 @@ export default function NotificationsScreen({ navigation }: Props): React.JSX.El
     <TouchableOpacity
       style={[
         styles.notificationCard,
-        !item.isRead && styles.notificationCardUnread,
+        !item.read && styles.notificationCardUnread,
       ]}
       onPress={() => handleMarkAsRead(item.id)}
     >
@@ -160,11 +161,11 @@ export default function NotificationsScreen({ navigation }: Props): React.JSX.El
           </Text>
         </View>
         <Text style={styles.notificationBody} numberOfLines={2}>
-          {item.body}
-        </Text>
+          {item.message}
+        </Text> 
         <View style={styles.notificationFooter}>
           <Text style={styles.notificationType}>{item.type.toUpperCase()}</Text>
-          {!item.isRead && <View style={styles.unreadDot} />}
+          {!item.read && <View style={styles.unreadDot} />}
         </View>
       </View>
 
@@ -177,7 +178,7 @@ export default function NotificationsScreen({ navigation }: Props): React.JSX.El
     </TouchableOpacity>
   );
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <SafeAreaView style={styles.container}>

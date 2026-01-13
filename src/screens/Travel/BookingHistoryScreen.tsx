@@ -38,7 +38,7 @@ export default function BookingHistoryScreen({ navigation }: Props): React.JSX.E
     try {
       setLoading(true);
       const response = await travelAPI.getBookingHistory();
-      setBookings(response.bookings);
+      setBookings(response);
     } catch (error) {
       console.error('Error loading bookings:', error);
     } finally {
@@ -127,9 +127,9 @@ export default function BookingHistoryScreen({ navigation }: Props): React.JSX.E
     >
       <View style={styles.bookingHeader}>
         <View style={styles.routeInfo}>
-          <Text style={styles.city}>{item.trip.route.origin}</Text>
+          <Text style={styles.city}>{item.trip.route.origin.name}</Text>
           <Ionicons name="arrow-forward" size={16} color={theme.colors.neutral[400]} />
-          <Text style={styles.city}>{item.trip.route.destination}</Text>
+          <Text style={styles.city}>{item.trip.route.destination.name}</Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
           <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>

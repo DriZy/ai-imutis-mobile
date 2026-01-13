@@ -17,7 +17,6 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../styles/theme';
 import { Trip, Passenger } from '../../types';
 import { useDispatch } from 'react-redux';
-import { useBooking } from '../../hooks/useBooking';
 import travelAPI from '../../services/api/travelAPI';
 import { formatCurrency } from '../../utils/formatting';
 
@@ -33,6 +32,23 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'momo' | 'orange_money'>('momo');
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1: Passengers, 2: Payment
+  const [fetchingTrip, setFetchingTrip] = useState(false);
+
+  React.useEffect(() => {
+    const loadTrip = async () => {
+      try {
+        setFetchingTrip(true);
+        const t = await travelAPI.getTripDetails(tripId);
+        setTrip(t);
+      } catch (error) {
+        console.error('Error fetching trip details:', error);
+      } finally {
+        setFetchingTrip(false);
+      }
+    };
+
+    loadTrip();
+  }, [tripId]);
 
   const handleAddPassenger = () => {
     if (passengers.length < 4) {
@@ -50,11 +66,13 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
     }
   };
 
-  const handleRemovePassenger = (id: string) => {
+  const handleRemovePassenger = (id?: string) => {
+    if (!id) return;
     setPassengers(passengers.filter(p => p.id !== id));
   };
 
-  const handlePassengerUpdate = (id: string, field: string, value: string) => {
+  const handlePassengerUpdate = (id?: string, field?: string, value?: string) => {
+    if (!id || !field) return;
     setPassengers(
       passengers.map(p => (p.id === id ? { ...p, [field]: value } : p))
     );
@@ -77,7 +95,7 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
         passengers,
         paymentMethod,
       };
-      const result = await travelAPI.bookTrip(bookingData);
+      const result = await travelAPI.createBooking(tripId, passengers, paymentMethod);
       
       Alert.alert('Success', 'Booking confirmed! Your e-ticket has been sent to your email.', [
         {
@@ -117,7 +135,7 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                 ]}
               >
                 <Ionicons
-                  name={currentStep > step ? 'checkmark' : String(step)}
+                  name={currentStep > step ? ('checkmark' as any) : (String(step) as any)}
                   size={16}
                   color={currentStep >= step ? '#FFFFFF' : theme.colors.neutral[400]}
                 />

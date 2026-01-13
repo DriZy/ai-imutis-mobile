@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import userAPI from '../../services/api/userAPI';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'SettingsScreen'>;
 
 export default function SettingsScreen({ navigation }: Props): React.JSX.Element {
   const { user } = useSelector((state: RootState) => state.auth);

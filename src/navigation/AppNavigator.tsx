@@ -27,7 +27,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   Dashboard: undefined;
   TravelSearch: undefined;
-  TravelResults: undefined;
+  TravelResults: { searchQuery: any };
   TravelDetails: { tripId: string };
   Booking: { tripId: string };
   BookingHistory: undefined;
@@ -40,6 +40,15 @@ export type RootStackParamList = {
   SessionManager: undefined;
   NotificationsScreen: undefined;
   CityPicker: { type: 'origin' | 'destination'; onSelect: (city: any) => void };
+
+  // Common keys used by various screens (keeps navigation typings permissive)
+  Login?: undefined;
+  Settings?: undefined;
+  SavedAddresses?: undefined;
+  PaymentMethods?: undefined;
+  BookingDetails?: { bookingId: string };
+  Tourism?: undefined;
+  Travel?: undefined;
 };
 
 export type TabParamList = {
@@ -68,7 +77,7 @@ function MainTabs() {
     >
       <Tab.Screen
         name="Travel"
-        component={SearchScreen}
+        component={SearchScreen as any}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bus" size={size} color={color} />
@@ -77,7 +86,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Tourism"
-        component={DashboardScreen} // Temporary - will be replaced with CitiesScreen
+        component={DashboardScreen as any} // Temporary - will be replaced with CitiesScreen
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map" size={size} color={color} />
@@ -86,7 +95,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Notifications"
-        component={DashboardScreen} // Temporary - will be replaced with NotificationsScreen
+        component={DashboardScreen as any} // Temporary - will be replaced with NotificationsScreen
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" size={size} color={color} />
@@ -95,7 +104,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Profile"
-        component={DashboardScreen} // Temporary - will be replaced with ProfileScreen
+        component={DashboardScreen as any} // Temporary - will be replaced with ProfileScreen
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />

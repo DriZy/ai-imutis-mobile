@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Segmented,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -42,7 +41,7 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
     try {
       setLoading(true);
       const response = await travelAPI.searchTrips(searchQuery);
-      setTrips(response.trips);
+      setTrips(response);
     } catch (error) {
       console.error('Error loading trips:', error);
     } finally {
@@ -87,11 +86,11 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
     >
       <View style={styles.tripHeader}>
         <View style={styles.routeInfo}>
-          <Text style={styles.city}>{item.route.origin}</Text>
+          <Text style={styles.city}>{item.route.origin.name}</Text>
           <Ionicons name="arrow-forward" size={16} color={theme.colors.neutral[400]} />
-          <Text style={styles.city}>{item.route.destination}</Text>
+          <Text style={styles.city}>{item.route.destination.name}</Text>
         </View>
-        {item.depturePrediction && (
+        {item.departurePrediction && (
           <View style={styles.predictionBadge}>
             <Ionicons name="bulb" size={14} color="#FFB800" />
             <Text style={styles.predictionText}>AI Prediction</Text>

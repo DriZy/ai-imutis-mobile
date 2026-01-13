@@ -19,9 +19,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { logout, updateProfile } from '../../store/slices/authSlice';
 import userAPI from '../../services/api/userAPI';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ProfileScreen'>;
 
 export default function ProfileScreen({ navigation }: Props): React.JSX.Element {
   const dispatch = useDispatch();
@@ -199,7 +199,7 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
             style={styles.menuItem}
             onPress={() => navigation.navigate('SessionManager')}
           >
-            <Ionicons name="lock" size={24} color={theme.colors.primary.main} />
+            <Ionicons name="lock-closed" size={24} color={theme.colors.primary.main} />
             <Text style={styles.menuText}>Active Sessions</Text>
             <Ionicons name="chevron-forward" size={24} color={theme.colors.neutral[400]} />
           </TouchableOpacity>

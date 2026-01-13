@@ -61,7 +61,7 @@ export default function SearchScreen({ navigation }: Props): React.JSX.Element {
       dispatch(setSearchQuery(query));
       
       // Navigate to results screen immediately while loading
-      navigation.navigate('TravelResults');
+      navigation.navigate('TravelResults', { searchQuery: query });
       
       // API call will be handled in TravelResults screen
     } catch (err) {

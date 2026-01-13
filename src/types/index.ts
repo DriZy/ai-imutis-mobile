@@ -18,6 +18,8 @@ export interface User {
   email?: string;
   phoneNumber?: string;
   displayName: string;
+  firstName?: string;
+  lastName?: string;
   photoURL?: string;
   preferredLanguage: 'en' | 'fr';
   notificationsEnabled: boolean;
@@ -34,6 +36,19 @@ export interface UserProfile {
   profilePhoto?: string;
   dateOfBirth?: Date;
   gender?: 'male' | 'female' | 'other';
+}
+
+// Update Passenger to reflect form fields used across the app
+export interface Passenger {
+  id?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  age?: number;
+  idNumber?: string;
+  phoneNumber?: string;
+  seatNumber?: number;
 }
 
 export interface UserPreferences {
@@ -119,7 +134,9 @@ export interface Route {
   origin: City;
   destination: City;
   distance: number; // km
-  estimatedDuration: number; // minutes
+  estimatedDuration?: number; // minutes
+  originCoordinates?: { latitude: number; longitude: number };
+  destinationCoordinates?: { latitude: number; longitude: number };
   routeGeometry?: string; // GeoJSON or encoded polyline
 }
 
@@ -147,6 +164,7 @@ export interface TrafficUpdate {
   speed: number; // km/h
   delay: number; // minutes
   lastUpdated: Date;
+  description?: string;
 }
 
 export interface Trip {
@@ -162,15 +180,11 @@ export interface Trip {
   driverName: string;
   vehicleRegistration: string;
   currentTraffic?: TrafficUpdate;
+  estimatedDuration?: number;
+  driverRating?: number;
 }
 
-export interface Passenger {
-  firstName: string;
-  lastName: string;
-  age?: number;
-  idNumber?: string;
-  phoneNumber?: string;
-}
+
 
 export interface Booking {
   id: string;

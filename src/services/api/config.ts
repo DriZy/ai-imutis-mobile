@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
     // Handle other errors
     if (error.response) {
       // Server responded with error status
-      const message = error.response.data?.message || 'Server error occurred';
+      const message = (error as any)?.response?.data?.message || 'Server error occurred';
       console.error('API Error:', message);
       return Promise.reject(new Error(message));
     } else if (error.request) {

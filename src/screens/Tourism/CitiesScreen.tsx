@@ -15,7 +15,7 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../styles/theme';
 import { City } from '../../types';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCities, setSelectedCity } from '../../store/slices/tourismSlice';
+import { setCities, setSelectedCity, setLoading } from '../../store/slices/tourismSlice';
 import { RootState } from '../../store/store';
 import tourismAPI from '../../services/api/tourismAPI';
 import storageService from '../../services/storage/storageService';
@@ -42,7 +42,7 @@ export default function CitiesScreen({ navigation }: Props): React.JSX.Element {
       }
 
       // Fetch from API
-      dispatch(tourismSlice.setLoading(true));
+      dispatch(setLoading(true));
       const apiCities = await tourismAPI.getCities();
       dispatch(setCities(apiCities));
       
