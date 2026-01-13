@@ -8,7 +8,8 @@ export default {
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "dark",
-    newArchEnabled: true,
+    scheme: "aiimutis",
+    newArchEnabled: false,
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",
@@ -16,7 +17,7 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.aiimutis.app"
+      bundleIdentifier: "com.aiimutis.mobile"
     },
     android: {
       adaptiveIcon: {
@@ -24,7 +25,8 @@ export default {
         backgroundColor: "#1E3A8A"
       },
       edgeToEdgeEnabled: true,
-      package: "com.aiimutis.app"
+      package: "com.aiimutis.mobile",
+      googleServicesFile: "./google-services.json"
     },
     web: {
       favicon: "./assets/favicon.png"

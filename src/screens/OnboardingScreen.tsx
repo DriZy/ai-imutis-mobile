@@ -17,20 +17,20 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: '1',
-    title: 'Track Your Rides',
-    description: 'Monitor your journey in real-time with advanced GPS tracking',
+    title: 'Live Ride Tracking',
+    description: 'GIS-powered navigation with cached tiles so you stay on route even with spotty data.',
     icon: 'navigate-circle-outline',
   },
   {
     id: '2',
-    title: 'Discover Places',
-    description: 'Explore amazing tourist destinations and hidden gems',
+    title: 'Tourism Discovery',
+    description: 'Browse cities, attractions, and must-do experiences, then save favorites to revisit later.',
     icon: 'compass-outline',
   },
   {
     id: '3',
-    title: 'Safe & Secure',
-    description: 'Your safety is our priority with 24/7 monitoring',
+    title: 'Safe & Aware',
+    description: 'Session manager, device awareness, and alerts keep your account and journeys protected.',
     icon: 'shield-checkmark-outline',
   },
 ];
@@ -66,7 +66,7 @@ export default function OnboardingScreen({ navigation }: Props): React.JSX.Eleme
   return (
     <LinearGradient colors={['#1E3A8A', '#3B82F6']} style={styles.container}>
       <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={styles.skipText}>Skip to sign in</Text>
       </TouchableOpacity>
 
       <FlatList

@@ -36,31 +36,31 @@ export default function DashboardScreen({ navigation }: Props): React.JSX.Elemen
   const menuItems: MenuItem[] = [
     {
       id: '1',
-      title: 'Track Ride',
+      title: 'Start Ride',
       icon: 'navigate-circle',
       color: '#3B82F6',
-      description: 'Start tracking your journey',
+      description: 'Launch live tracking with OSM tiles and safety beacons.',
     },
     {
       id: '2',
-      title: 'Explore Places',
+      title: 'Discover Places',
       icon: 'compass',
       color: '#10B981',
-      description: 'Discover tourist destinations',
+      description: 'Tourism cities, attractions, and nearby highlights.',
     },
     {
       id: '3',
-      title: 'My Trips',
+      title: 'Trips & Bookings',
       icon: 'time',
       color: '#F59E0B',
-      description: 'View your trip history',
+      description: 'History, bookings, and upcoming rides in one place.',
     },
     {
       id: '4',
       title: 'Favorites',
       icon: 'heart',
       color: '#EF4444',
-      description: 'Your saved places',
+      description: 'Saved attractions and routes for quick access.',
     },
   ];
 
@@ -97,7 +97,7 @@ export default function DashboardScreen({ navigation }: Props): React.JSX.Elemen
         </View>
 
         <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Your Stats</Text>
+          <Text style={styles.sectionTitle}>Your Stats (sync to update)</Text>
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>0</Text>
@@ -115,11 +115,11 @@ export default function DashboardScreen({ navigation }: Props): React.JSX.Elemen
         </View>
 
         <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <Text style={styles.sectionTitle}>Recent Activity & Alerts</Text>
           <View style={styles.emptyState}>
             <Ionicons name="file-tray-outline" size={48} color="rgba(255,255,255,0.5)" />
-            <Text style={styles.emptyText}>No recent activity</Text>
-            <Text style={styles.emptySubtext}>Start your first trip to see it here</Text>
+            <Text style={styles.emptyText}>No activity yet</Text>
+            <Text style={styles.emptySubtext}>Start a ride or save an attraction to see it here.</Text>
           </View>
         </View>
       </ScrollView>

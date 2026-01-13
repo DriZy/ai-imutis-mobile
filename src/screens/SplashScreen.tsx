@@ -23,7 +23,7 @@ export default function SplashScreen({ navigation }: Props): React.JSX.Element {
     >
       <View style={styles.content}>
         <Text style={styles.title}>AI-IMUTIS</Text>
-        <Text style={styles.subtitle}>Ride Tracking & Tourism</Text>
+        <Text style={styles.subtitle}>Mobility, Tourism, and Safety—All in One</Text>
       </View>
     </LinearGradient>
   );

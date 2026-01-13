@@ -13,7 +13,7 @@ export default function AuthScreen({ navigation }: Props): React.JSX.Element {
       <View style={styles.header}>
         <Text style={styles.title}>Welcome to</Text>
         <Text style={styles.appName}>AI-IMUTIS</Text>
-        <Text style={styles.subtitle}>Choose your sign-in method</Text>
+        <Text style={styles.subtitle}>Sign in to track rides, explore tourism spots, and stay protected</Text>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -30,7 +30,7 @@ export default function AuthScreen({ navigation }: Props): React.JSX.Element {
           onPress={() => navigation.navigate('PhoneAuth')}
         >
           <Ionicons name="call-outline" size={24} color="#1E3A8A" />
-          <Text style={styles.buttonText}>Continue with Phone</Text>
+          <Text style={styles.buttonText}>Continue with Phone (OTP)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -46,7 +46,7 @@ export default function AuthScreen({ navigation }: Props): React.JSX.Element {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          By continuing, you agree to our Terms & Privacy Policy
+          Secure authentication with encrypted storage. By continuing, you agree to our Terms & Privacy Policy.
         </Text>
       </View>
     </LinearGradient>

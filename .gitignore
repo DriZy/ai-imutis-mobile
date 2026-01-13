@@ -6,11 +6,17 @@ node_modules/
 # Environment variables
 .env
 
+# Firebase config files (sensitive)
+google-services.json
+android/app/google-services.json
+ios/GoogleService-Info.plist
+
 # Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
+.vscode/
 
 # Native
 .kotlin/
@@ -43,7 +49,8 @@ yarn-error.*
 /ios
 /android
 
+# Documentation (ignore all .md files except README.md)
+*.md
+!README.md
 
-# Documentation
-TYPESCRIPT_MIGRATION.md
-TYPESCRIPT_SETUP.md
+
