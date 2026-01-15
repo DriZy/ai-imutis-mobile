@@ -6,43 +6,42 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Segmented,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../styles/theme';
-import { Trip } from '../../types';
+import { TravelSummary, SearchQuery } from '../../types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import travelAPI from '../../services/api/travelAPI';
-import { formatCurrency, formatTime } from '../../utils/formatting';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TravelResults'>;
 
 export default function TravelResultsScreen({ route, navigation }: Props): React.JSX.Element {
-  const { searchQuery } = route.params;
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]);
+  const searchQuery = useSelector((state: RootState) => state.travel.searchQuery);
+  const [trips, setTrips] = useState<TravelSummary[]>([]);
+  const [filteredTrips, setFilteredTrips] = useState<TravelSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [sortBy, setSortBy] = useState<'time' | 'price' | 'rating'>('time');
-  const [filterVehicle, setFilterVehicle] = useState<string | null>(null);
 
   useEffect(() => {
-    loadTrips();
+    if (searchQuery) {
+      loadTrips(searchQuery);
+    }
   }, [searchQuery]);
 
   useEffect(() => {
     applyFiltersAndSort();
-  }, [trips, sortBy, filterVehicle]);
+  }, [trips, sortBy]);
 
-  const loadTrips = async () => {
+  const loadTrips = async (query: SearchQuery) => {
     try {
       setLoading(true);
-      const response = await travelAPI.searchTrips(searchQuery);
-      setTrips(response.trips);
+      const results = await travelAPI.searchTrips(query);
+      setTrips(results);
     } catch (error) {
       console.error('Error loading trips:', error);
     } finally {
@@ -52,51 +51,41 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadTrips();
+    if (searchQuery) {
+      await loadTrips(searchQuery);
+    }
     setRefreshing(false);
   };
 
   const applyFiltersAndSort = () => {
     let results = [...trips];
 
-    // Apply vehicle filter
-    if (filterVehicle) {
-      results = results.filter(t => t.vehicleType === filterVehicle);
-    }
-
-    // Apply sorting
     switch (sortBy) {
       case 'price':
-        results.sort((a, b) => a.pricePerSeat - b.pricePerSeat);
+        results.sort((a, b) => a.price_per_seat - b.price_per_seat);
         break;
       case 'rating':
-        results.sort((a, b) => (b.driverRating || 0) - (a.driverRating || 0));
+        // No rating in summary; keep current order
         break;
       case 'time':
       default:
-        results.sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime());
+        results.sort((a, b) => new Date(a.departure_time).getTime() - new Date(b.departure_time).getTime());
     }
 
     setFilteredTrips(results);
   };
 
-  const renderTripCard = ({ item }: { item: Trip }) => (
+  const renderTripCard = ({ item }: { item: TravelSummary }) => (
     <TouchableOpacity
       style={styles.tripCard}
       onPress={() => navigation.navigate('TravelDetails', { tripId: item.id })}
     >
       <View style={styles.tripHeader}>
         <View style={styles.routeInfo}>
-          <Text style={styles.city}>{item.route.origin}</Text>
+          <Text style={styles.city}>{item.origin}</Text>
           <Ionicons name="arrow-forward" size={16} color={theme.colors.neutral[400]} />
-          <Text style={styles.city}>{item.route.destination}</Text>
+          <Text style={styles.city}>{item.destination}</Text>
         </View>
-        {item.depturePrediction && (
-          <View style={styles.predictionBadge}>
-            <Ionicons name="bulb" size={14} color="#FFB800" />
-            <Text style={styles.predictionText}>AI Prediction</Text>
-          </View>
-        )}
       </View>
 
       <View style={styles.tripDetails}>
@@ -104,23 +93,23 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
           <Ionicons name="time" size={16} color={theme.colors.primary.main} />
           <View style={styles.detailText}>
             <Text style={styles.detailLabel}>Departure</Text>
-            <Text style={styles.detailValue}>{formatTime(new Date(item.departureTime))}</Text>
+            <Text style={styles.detailValue}>{new Date(item.departure_time).toLocaleTimeString()}</Text>
           </View>
         </View>
 
         <View style={styles.detailItem}>
           <Ionicons name="hourglass" size={16} color={theme.colors.primary.main} />
           <View style={styles.detailText}>
-            <Text style={styles.detailLabel}>Duration</Text>
-            <Text style={styles.detailValue}>~{item.estimatedDuration} hrs</Text>
+            <Text style={styles.detailLabel}>Arrival</Text>
+            <Text style={styles.detailValue}>{new Date(item.estimated_arrival).toLocaleTimeString()}</Text>
           </View>
         </View>
 
         <View style={styles.detailItem}>
           <Ionicons name="car" size={16} color={theme.colors.primary.main} />
           <View style={styles.detailText}>
-            <Text style={styles.detailLabel}>{item.vehicleType}</Text>
-            <Text style={styles.detailValue}>{item.availableSeats}/{item.totalSeats} seats</Text>
+            <Text style={styles.detailLabel}>Seats</Text>
+            <Text style={styles.detailValue}>{item.available_seats} seats</Text>
           </View>
         </View>
       </View>
@@ -128,34 +117,24 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
       <View style={styles.tripFooter}>
         <View>
           <Text style={styles.priceLabel}>Price per seat</Text>
-          <Text style={styles.price}>{formatCurrency(item.pricePerSeat)}</Text>
+          <Text style={styles.price}>{item.price_per_seat}</Text>
         </View>
         <TouchableOpacity style={styles.selectButton}>
           <Text style={styles.selectButtonText}>Select</Text>
         </TouchableOpacity>
       </View>
-
-      {item.currentTraffic && (
-        <View style={[styles.trafficAlert, { backgroundColor: getTrafficColor(item.currentTraffic.status) }]}>
-          <Ionicons name="warning" size={14} color="#FFFFFF" />
-          <Text style={styles.trafficText}>Traffic: {item.currentTraffic.status}</Text>
-        </View>
-      )}
     </TouchableOpacity>
   );
 
-  const getTrafficColor = (status: string) => {
-    switch (status) {
-      case 'light':
-        return theme.colors.status.success;
-      case 'moderate':
-        return theme.colors.status.warning;
-      case 'heavy':
-        return theme.colors.status.error;
-      default:
-        return theme.colors.neutral[500];
-    }
-  };
+  if (!searchQuery) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContent}>
+          <Text style={styles.emptyText}>No search query.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -171,56 +150,6 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
         </View>
       </View>
 
-      {/* Filters */}
-      <View style={styles.filterBar}>
-        <Text style={styles.filterLabel}>Sort by:</Text>
-        <View style={styles.sortButtons}>
-          {(['time', 'price', 'rating'] as const).map(option => (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.sortButton,
-                sortBy === option && styles.sortButtonActive,
-              ]}
-              onPress={() => setSortBy(option)}
-            >
-              <Text
-                style={[
-                  styles.sortButtonText,
-                  sortBy === option && styles.sortButtonTextActive,
-                ]}
-              >
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* Vehicle Filter */}
-      <View style={styles.vehicleFilter}>
-        {['minibus', 'bus', 'taxi'].map(vehicle => (
-          <TouchableOpacity
-            key={vehicle}
-            style={[
-              styles.vehicleTag,
-              filterVehicle === vehicle && styles.vehicleTagActive,
-            ]}
-            onPress={() => setFilterVehicle(filterVehicle === vehicle ? null : vehicle)}
-          >
-            <Text
-              style={[
-                styles.vehicleTagText,
-                filterVehicle === vehicle && styles.vehicleTagTextActive,
-              ]}
-            >
-              {vehicle.charAt(0).toUpperCase() + vehicle.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Trips List */}
       {loading ? (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color={theme.colors.primary.main} />
@@ -229,7 +158,7 @@ export default function TravelResultsScreen({ route, navigation }: Props): React
         <FlatList
           data={filteredTrips}
           renderItem={renderTripCard}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           onRefresh={handleRefresh}
           refreshing={refreshing}
@@ -271,69 +200,6 @@ const styles = StyleSheet.create({
     ...theme.typography.styles.bodySmall,
     color: theme.colors.text.secondary,
   },
-  filterBar: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.neutral[200],
-  },
-  filterLabel: {
-    ...theme.typography.styles.bodySmall,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.sm,
-  },
-  sortButtons: {
-    flexDirection: 'row',
-    gap: theme.spacing.sm,
-  },
-  sortButton: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.neutral[100],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[300],
-  },
-  sortButtonActive: {
-    backgroundColor: theme.colors.primary.main,
-    borderColor: theme.colors.primary.main,
-  },
-  sortButtonText: {
-    ...theme.typography.styles.caption,
-    color: theme.colors.text.primary,
-    fontWeight: '600',
-  },
-  sortButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  vehicleFilter: {
-    flexDirection: 'row',
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    gap: theme.spacing.sm,
-  },
-  vehicleTag: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.full,
-    backgroundColor: theme.colors.neutral[100],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[300],
-  },
-  vehicleTagActive: {
-    backgroundColor: theme.colors.secondary.main,
-    borderColor: theme.colors.secondary.main,
-  },
-  vehicleTagText: {
-    ...theme.typography.styles.caption,
-    color: theme.colors.text.primary,
-    fontWeight: '600',
-  },
-  vehicleTagTextActive: {
-    color: '#FFFFFF',
-  },
   listContent: {
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.md,
@@ -362,20 +228,6 @@ const styles = StyleSheet.create({
     ...theme.typography.styles.body,
     fontWeight: '700',
     color: theme.colors.text.primary,
-  },
-  predictionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 4,
-    borderRadius: theme.borderRadius.sm,
-    gap: 4,
-  },
-  predictionText: {
-    ...theme.typography.styles.caption,
-    color: '#92400E',
-    fontWeight: '600',
   },
   tripDetails: {
     backgroundColor: theme.colors.background.paper,
@@ -427,18 +279,6 @@ const styles = StyleSheet.create({
     ...theme.typography.styles.bodySmall,
     fontWeight: '700',
     color: '#FFFFFF',
-  },
-  trafficAlert: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    gap: theme.spacing.sm,
-  },
-  trafficText: {
-    ...theme.typography.styles.caption,
-    color: '#FFFFFF',
-    fontWeight: '600',
   },
   centerContent: {
     flex: 1,

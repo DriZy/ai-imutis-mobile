@@ -52,7 +52,7 @@ export default function SearchScreen({ navigation }: Props): React.JSX.Element {
     const query: SearchQuery = {
       origin,
       destination,
-      departureDate,
+      departureDate: departureDate.toISOString(), // Convert Date to ISO string
       passengers,
     };
 

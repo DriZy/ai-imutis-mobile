@@ -9,30 +9,45 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import MapView, { Marker, Polyline } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../styles/theme';
-import { Trip } from '../../types';
+import { TravelDetail } from '../../types';
 import travelAPI from '../../services/api/travelAPI';
 import { formatCurrency, formatTime } from '../../utils/formatting';
+import { watchLocation } from '../../services/location/locationService';
+import { MAP_CONFIG } from '../../utils/constants';
+import OpenStreetMap from '../../components/OpenStreetMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TravelDetails'>;
 
 export default function TravelDetailsScreen({ route, navigation }: Props): React.JSX.Element {
   const { tripId } = route.params;
-  const [trip, setTrip] = useState<Trip | null>(null);
+  const [detail, setDetail] = useState<TravelDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userCoord, setUserCoord] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [pathCoords, setPathCoords] = useState<{ latitude: number; longitude: number }[]>([]);
 
   useEffect(() => {
     loadTripDetails();
   }, [tripId]);
 
+  useEffect(() => {
+    // Start tracking user location once screen mounts
+    const stop = watchLocation('current-user', (loc) => {
+      setUserCoord({ latitude: loc.latitude, longitude: loc.longitude });
+    });
+    return () => stop();
+  }, []);
+
   const loadTripDetails = async () => {
     try {
       setLoading(true);
       const data = await travelAPI.getTripDetails(tripId);
-      setTrip(data);
+      setDetail(data);
+      if (data.route_geometry) {
+        setPathCoords(parseLineString(String(data.route_geometry)));
+      }
     } catch (error) {
       console.error('Error loading trip details:', error);
     } finally {
@@ -40,7 +55,20 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
     }
   };
 
-  if (loading || !trip) {
+  function parseLineString(line: string): { latitude: number; longitude: number }[] {
+    const coords: { latitude: number; longitude: number }[] = [];
+    const match = line.match(/LINESTRING\(([^)]+)\)/i);
+    const body = match ? match[1] : line;
+    body.split(',').forEach(pair => {
+      const nums = pair.trim().split(/\s+/).map(Number);
+      if (nums.length >= 2 && nums.every(n => !isNaN(n))) {
+        coords.push({ latitude: nums[1], longitude: nums[0] });
+      }
+    });
+    return coords;
+  }
+
+  if (loading || !detail) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContent}>
@@ -49,13 +77,6 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
       </SafeAreaView>
     );
   }
-
-  const mapRegion = {
-    latitude: (trip.route.originCoordinates.latitude + trip.route.destinationCoordinates.latitude) / 2,
-    longitude: (trip.route.originCoordinates.longitude + trip.route.destinationCoordinates.longitude) / 2,
-    latitudeDelta: 0.5,
-    longitudeDelta: 0.5,
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -77,7 +98,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               </View>
               <View style={styles.routeInfo}>
                 <Text style={styles.routeLabel}>From</Text>
-                <Text style={styles.routeName}>{trip.route.origin}</Text>
+                <Text style={styles.routeName}>{detail.origin}</Text>
               </View>
             </View>
 
@@ -89,7 +110,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               </View>
               <View style={styles.routeInfo}>
                 <Text style={styles.routeLabel}>To</Text>
-                <Text style={styles.routeName}>{trip.route.destination}</Text>
+                <Text style={styles.routeName}>{detail.destination}</Text>
               </View>
             </View>
           </View>
@@ -97,23 +118,33 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
 
         {/* Map */}
         <View style={styles.mapContainer}>
-          <MapView style={styles.map} region={mapRegion} scrollEnabled={false}>
-            <Marker
-              coordinate={trip.route.originCoordinates}
-              title={trip.route.origin}
-              pinColor={theme.colors.primary.main}
-            />
-            <Marker
-              coordinate={trip.route.destinationCoordinates}
-              title={trip.route.destination}
-              pinColor={theme.colors.secondary.main}
-            />
-            <Polyline
-              coordinates={[trip.route.originCoordinates, trip.route.destinationCoordinates]}
-              strokeColor={theme.colors.primary.main}
-              strokeWidth={3}
-            />
-          </MapView>
+          <OpenStreetMap
+            centerLat={pathCoords.length > 0 ? pathCoords[0].latitude : MAP_CONFIG.DEFAULT_LATITUDE}
+            centerLng={pathCoords.length > 0 ? pathCoords[0].longitude : MAP_CONFIG.DEFAULT_LONGITUDE}
+            zoom={13}
+            markers={[
+              {
+                id: 'origin',
+                latitude: pathCoords[0]?.latitude || MAP_CONFIG.DEFAULT_LATITUDE,
+                longitude: pathCoords[0]?.longitude || MAP_CONFIG.DEFAULT_LONGITUDE,
+                title: detail.origin,
+                description: 'Departure',
+                color: theme.colors.primary.main,
+              },
+              ...(pathCoords.length > 1 ? [{
+                id: 'destination',
+                latitude: pathCoords[pathCoords.length - 1].latitude,
+                longitude: pathCoords[pathCoords.length - 1].longitude,
+                title: detail.destination,
+                description: 'Destination',
+                color: theme.colors.secondary.main,
+              }] : []),
+            ]}
+            routes={pathCoords.length >= 2 ? [{ id: 'route', path: pathCoords }] : []}
+            height={300}
+            showUserLocation={!!userCoord}
+            userLocation={userCoord || undefined}
+          />
         </View>
 
         {/* Trip Info */}
@@ -126,7 +157,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
                 <Ionicons name="time" size={20} color={theme.colors.primary.main} />
                 <Text style={styles.infoLabel}>Departure</Text>
               </View>
-              <Text style={styles.infoValue}>{formatTime(new Date(trip.departureTime))}</Text>
+              <Text style={styles.infoValue}>{new Date(detail.departure_time).toLocaleTimeString()}</Text>
             </View>
 
             <View style={styles.divider} />
@@ -136,7 +167,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
                 <Ionicons name="hourglass" size={20} color={theme.colors.primary.main} />
                 <Text style={styles.infoLabel}>Duration</Text>
               </View>
-              <Text style={styles.infoValue}>~{trip.estimatedDuration} hours</Text>
+              <Text style={styles.infoValue}>~{Math.round((detail.duration_minutes || 0) / 60)} hours</Text>
             </View>
 
             <View style={styles.divider} />
@@ -146,7 +177,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
                 <Ionicons name="timer" size={20} color={theme.colors.primary.main} />
                 <Text style={styles.infoLabel}>Arrival</Text>
               </View>
-              <Text style={styles.infoValue}>{formatTime(new Date(trip.estimatedArrivalTime))}</Text>
+              <Text style={styles.infoValue}>{new Date(detail.estimated_arrival).toLocaleTimeString()}</Text>
             </View>
           </View>
         </View>
@@ -158,37 +189,34 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
           <View style={styles.vehicleCard}>
             <View style={styles.vehicleHeader}>
               <View>
-                <Text style={styles.vehicleType}>{trip.vehicleType.toUpperCase()}</Text>
-                <Text style={styles.vehicleReg}>{trip.vehicleRegistration}</Text>
+                <Text style={styles.vehicleType}>Vehicle</Text>
+                <Text style={styles.vehicleReg}>Seats: {detail.available_seats}</Text>
               </View>
               <View style={styles.seatsInfo}>
                 <Ionicons name="seat" size={24} color={theme.colors.primary.main} />
-                <Text style={styles.seatsText}>{trip.availableSeats}/{trip.totalSeats}</Text>
+                <Text style={styles.seatsText}>{detail.available_seats}</Text>
               </View>
             </View>
 
             <View style={styles.vehicleDetails}>
               <View style={styles.detailItem}>
-                <Text style={styles.detailLabel}>Driver</Text>
-                <Text style={styles.detailValue}>{trip.driverName}</Text>
+                <Text style={styles.detailLabel}>Confidence</Text>
+                <Text style={styles.detailValue}>{Math.round((detail.confidence || 0) * 100)}%</Text>
               </View>
               <View style={styles.detailItem}>
-                <Text style={styles.detailLabel}>Rating</Text>
-                <Text style={styles.detailValue}>
-                  <Ionicons name="star" size={14} color="#FFB800" />
-                  {' '}{trip.driverRating?.toFixed(1) || 'N/A'}
-                </Text>
+                <Text style={styles.detailLabel}>Distance</Text>
+                <Text style={styles.detailValue}>{detail.distance_km ? `${detail.distance_km} km` : 'N/A'}</Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Price per Seat</Text>
-                <Text style={styles.detailValue}>{formatCurrency(trip.pricePerSeat)}</Text>
+                <Text style={styles.detailValue}>{detail.price_per_seat}</Text>
               </View>
             </View>
           </View>
         </View>
 
         {/* AI Departure Prediction */}
-        {trip.depturePrediction && (
+        {/* Prediction section omitted; backend format differs */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>AI Departure Prediction</Text>
             

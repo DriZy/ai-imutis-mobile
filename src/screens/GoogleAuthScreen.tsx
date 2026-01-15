@@ -51,7 +51,7 @@ export default function GoogleAuthScreen({ navigation }: Props): React.JSX.Eleme
         if (id_token) {
           const credential = GoogleAuthProvider.credential(id_token);
           await signInWithCredential(auth, credential);
-          navigation.navigate('Dashboard');
+          navigation.navigate('MainTabs' as any);
         }
       } else {
         Alert.alert('Cancelled', 'Google sign-in was cancelled');

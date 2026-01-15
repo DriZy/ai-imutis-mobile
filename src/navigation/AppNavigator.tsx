@@ -16,6 +16,12 @@ import PhoneAuthScreen from '../screens/PhoneAuthScreen';
 import GoogleAuthScreen from '../screens/GoogleAuthScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import SearchScreen from '../screens/Travel/SearchScreen';
+import CityPickerScreen from '../screens/Travel/CityPickerScreen';
+import TravelResultsScreen from '../screens/Travel/TravelResultsScreen';
+import MapHomeScreen from '../screens/Map/MapHomeScreen';
+import TravelDetailsScreen from '../screens/Travel/TravelDetailsScreen';
+import BookingScreen from '../screens/Travel/BookingScreen';
+import BookingHistoryScreen from '../screens/Travel/BookingHistoryScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -43,6 +49,7 @@ export type RootStackParamList = {
 };
 
 export type TabParamList = {
+  Map: undefined;
   Travel: undefined;
   Tourism: undefined;
   Notifications: undefined;
@@ -55,6 +62,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 function MainTabs() {
   return (
     <Tab.Navigator
+      initialRouteName="Map"
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary.main,
         tabBarInactiveTintColor: theme.colors.neutral[400],
@@ -66,6 +74,16 @@ function MainTabs() {
         },
       }}
     >
+      <Tab.Screen
+        name="Map"
+        component={MapHomeScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map" size={size} color={color} />
+          ),
+          title: 'Explore',
+        }}
+      />
       <Tab.Screen
         name="Travel"
         component={SearchScreen}
@@ -136,6 +154,11 @@ export default function AppNavigator(): React.JSX.Element {
             <Stack.Screen name="MainTabs" component={MainTabs} />
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="TravelSearch" component={SearchScreen} />
+            <Stack.Screen name="CityPicker" component={CityPickerScreen} />
+            <Stack.Screen name="TravelResults" component={TravelResultsScreen} />
+            <Stack.Screen name="TravelDetails" component={TravelDetailsScreen} />
+            <Stack.Screen name="Booking" component={BookingScreen} />
+            <Stack.Screen name="BookingHistory" component={BookingHistoryScreen} />
           </>
         ) : (
           <>

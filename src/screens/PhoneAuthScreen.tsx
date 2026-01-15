@@ -64,7 +64,7 @@ export default function PhoneAuthScreen({ navigation }: Props): React.JSX.Elemen
     try {
       const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
       await signInWithCredential(auth, credential);
-      navigation.navigate('Dashboard');
+      navigation.navigate('MainTabs' as any);
     } catch (error) {
       Alert.alert('Error', 'Invalid verification code');
     } finally {

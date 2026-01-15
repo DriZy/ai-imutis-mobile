@@ -1,71 +1,65 @@
 import apiClient from './config';
-import { UserProfile, UserPreferences, DeviceSession, ApiResponse } from '../../types';
+import { 
+  UserProfile, 
+  UserPreferences, 
+  DeviceSession,
+  UpdateUserProfileRequest,
+  UserPreferenceRequest,
+  LocationTrackRequest,
+  LocationTrackResponse,
+  VerifyTokenResponse,
+  DeviceSessionList,
+  MessageResponse
+} from '../../types';
 
 // User API Service
 const userAPI = {
+  // Verify authentication token
+  async verifyToken(): Promise<VerifyTokenResponse> {
+    const response = await apiClient.post<VerifyTokenResponse>('/api/auth/verify-token');
+    return response.data;
+  },
+
   // Get user profile
   async getProfile(): Promise<UserProfile> {
-    const response = await apiClient.get<ApiResponse<UserProfile>>('/api/users/profile');
-    if (!response.data.data) {
-      throw new Error('Profile not found');
-    }
-    return response.data.data;
+    const response = await apiClient.get<UserProfile>('/api/users/profile');
+    return response.data;
   },
 
   // Update user profile
-  async updateProfile(profile: Partial<UserProfile>): Promise<UserProfile> {
-    const response = await apiClient.put<ApiResponse<UserProfile>>('/api/users/profile', profile);
-    if (!response.data.data) {
-      throw new Error('Failed to update profile');
-    }
-    return response.data.data;
+  async updateProfile(data: UpdateUserProfileRequest): Promise<UserProfile> {
+    const response = await apiClient.put<UserProfile>('/api/users/profile', data);
+    return response.data;
   },
 
-  // Get user preferences
-  async getPreferences(): Promise<UserPreferences> {
-    const response = await apiClient.get<ApiResponse<UserPreferences>>('/api/users/preferences');
-    if (!response.data.data) {
-      throw new Error('Preferences not found');
-    }
-    return response.data.data;
+  // Delete account
+  async deleteAccount(): Promise<MessageResponse> {
+    const response = await apiClient.delete<MessageResponse>('/api/users/account');
+    return response.data;
   },
 
-  // Update user preferences
-  async updatePreferences(preferences: Partial<UserPreferences>): Promise<UserPreferences> {
-    const response = await apiClient.put<ApiResponse<UserPreferences>>(
-      '/api/users/preferences',
-      preferences
-    );
-    if (!response.data.data) {
-      throw new Error('Failed to update preferences');
-    }
-    return response.data.data;
+  // Save user preferences
+  async savePreferences(preferences: UserPreferenceRequest): Promise<MessageResponse> {
+    const response = await apiClient.post<MessageResponse>('/api/users/preferences', preferences);
+    return response.data;
   },
 
   // Get active sessions
   async getSessions(): Promise<DeviceSession[]> {
-    const response = await apiClient.get<ApiResponse<DeviceSession[]>>('/api/users/sessions');
-    return response.data.data || [];
+    const response = await apiClient.get<DeviceSessionList>('/api/users/sessions');
+    return response.data.sessions || [];
   },
 
   // Revoke a session
-  async revokeSession(sessionId: string): Promise<void> {
-    await apiClient.delete(`/api/users/sessions/${sessionId}`);
+  async revokeSession(sessionId: string): Promise<MessageResponse> {
+    const response = await apiClient.delete<MessageResponse>(`/api/users/sessions/${sessionId}`);
+    return response.data;
   },
 
   // Track user location
-  async trackLocation(locationData: {
-    latitude: number;
-    longitude: number;
-    accuracy: number;
-    deviceIP: string;
-  }): Promise<void> {
-    await apiClient.post('/api/users/location', locationData);
-  },
-
-  // Delete account
-  async deleteAccount(): Promise<void> {
-    await apiClient.delete('/api/users/account');
+  async trackLocation(data: LocationTrackRequest): Promise<LocationTrackResponse> {
+    const response = await apiClient.post<LocationTrackResponse>('/api/users/locations/track', data);
+    return response.data;
   },
 };
 

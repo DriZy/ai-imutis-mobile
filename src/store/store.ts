@@ -13,17 +13,6 @@ export const store = configureStore({
     location: locationReducer,
     notifications: notificationReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these action types
-        ignoredActions: ['auth/setUser', 'travel/setSearchResults'],
-        // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
-        // Ignore these paths in the state
-        ignoredPaths: ['travel.searchQuery.departureDate'],
-      },
-    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

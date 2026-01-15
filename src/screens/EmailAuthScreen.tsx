@@ -52,7 +52,7 @@ export default function EmailAuthScreen({ navigation }: Props): React.JSX.Elemen
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      navigation.navigate('Dashboard');
+      navigation.navigate('MainTabs' as any);
     } catch (error) {
       let errorMessage = 'An error occurred';
       if (error instanceof Object && 'code' in error && typeof error.code === 'string') {

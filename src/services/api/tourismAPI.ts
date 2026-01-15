@@ -1,85 +1,52 @@
 import apiClient from './config';
-import { City, Attraction, Review, SavedAttraction, ApiResponse, PaginatedResponse } from '../../types';
+import { 
+  City, 
+  Attraction,
+  AttractionSearchRequest,
+  AttractionSearchResponse,
+  ApiResponse,
+  PaginatedResponse,
+  Review,
+  SavedAttraction
+} from '../../types';
 
 // Tourism API Service
 const tourismAPI = {
-  // Get all cities
+  // List all cities
   async getCities(): Promise<City[]> {
-    const response = await apiClient.get<ApiResponse<City[]>>('/api/tourism/cities');
-    return response.data.data || [];
-  },
-
-  // Get city details
-  async getCityDetails(cityId: string): Promise<City> {
-    const response = await apiClient.get<ApiResponse<City>>(`/api/tourism/cities/${cityId}`);
-    if (!response.data.data) {
-      throw new Error('City not found');
-    }
-    return response.data.data;
+    const response = await apiClient.get<City[]>('/api/cities');
+    return response.data || [];
   },
 
   // Get attractions by city
-  async getAttractionsByCity(
-    cityId: string,
-    category?: string,
-    page: number = 1
-  ): Promise<PaginatedResponse<Attraction>> {
-    const response = await apiClient.get<ApiResponse<PaginatedResponse<Attraction>>>(
-      `/api/tourism/cities/${cityId}/attractions`,
-      {
-        params: { category, page, pageSize: 20 },
-      }
-    );
-    return response.data.data || { items: [], total: 0, page: 1, pageSize: 20, hasMore: false };
-  },
-
-  // Search attractions
-  async searchAttractions(query: string, category?: string): Promise<Attraction[]> {
-    const response = await apiClient.get<ApiResponse<Attraction[]>>(
-      '/api/tourism/attractions/search',
-      {
-        params: { q: query, category },
-      }
-    );
-    return response.data.data || [];
+  async getAttractionsByCity(cityId: string): Promise<Attraction[]> {
+    const response = await apiClient.get<Attraction[]>(`/api/cities/${cityId}/attractions`);
+    return response.data || [];
   },
 
   // Get attraction details
   async getAttractionDetails(attractionId: string): Promise<Attraction> {
-    const response = await apiClient.get<ApiResponse<Attraction>>(
-      `/api/tourism/attractions/${attractionId}`
-    );
-    if (!response.data.data) {
-      throw new Error('Attraction not found');
-    }
-    return response.data.data;
+    const response = await apiClient.get<Attraction>(`/api/attractions/${attractionId}`);
+    return response.data;
   },
 
-  // Get nearby attractions
-  async getNearbyAttractions(latitude: number, longitude: number, radius: number = 5000): Promise<Attraction[]> {
-    const response = await apiClient.get<ApiResponse<Attraction[]>>(
-      '/api/tourism/attractions/nearby',
-      {
-        params: { latitude, longitude, radius },
-      }
-    );
-    return response.data.data || [];
+  // Search attractions
+  async searchAttractions(
+    query: string, 
+    cityId?: string, 
+    category?: string,
+    minRating?: number
+  ): Promise<Attraction[]> {
+    const request: AttractionSearchRequest = {
+      query,
+      city_id: cityId,
+      category,
+      min_rating: minRating,
+    };
+    const response = await apiClient.post<AttractionSearchResponse>('/api/attractions/search', request);
+    return response.data.results || [];
   },
 
-  // Save attraction to favorites
-  async saveAttraction(attractionId: string, notes?: string): Promise<SavedAttraction> {
-    const response = await apiClient.post<ApiResponse<SavedAttraction>>(
-      '/api/tourism/saved-attractions',
-      {
-        attractionId,
-        notes,
-      }
-    );
-    if (!response.data.data) {
-      throw new Error('Failed to save attraction');
-    }
-    return response.data.data;
-  },
 
   // Get saved attractions
   async getSavedAttractions(): Promise<SavedAttraction[]> {
