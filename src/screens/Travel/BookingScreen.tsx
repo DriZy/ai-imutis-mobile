@@ -17,9 +17,10 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import { theme } from '../../styles/theme';
 import { Trip, Passenger } from '../../types';
 import { useDispatch } from 'react-redux';
-import { useBooking } from '../../hooks/useBooking';
+
 import travelAPI from '../../services/api/travelAPI';
 import { formatCurrency } from '../../utils/formatting';
+import { PaymentProcessingModal } from '../../components/payment/PaymentProcessingModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Booking'>;
 
@@ -31,8 +32,17 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
     { id: '1', name: '', email: '', phoneNumber: '', idNumber: '', seatNumber: 1 },
   ]);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'momo' | 'orange_money'>('momo');
+  const [paymentPhoneNumber, setPaymentPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1: Passengers, 2: Payment
+
+  // Payment Modal State
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>('processing');
+  const [paymentMessage, setPaymentMessage] = useState('Initiating transaction...');
+
+  // Effect to load trip data (simulated for now if not in store/api yet linked properly)
+  // In a real app we'd fetch trip details by ID if not passed completely
 
   const handleAddPassenger = () => {
     if (passengers.length < 4) {
@@ -64,39 +74,77 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
     return passengers.every(p => p.name && p.email && p.phoneNumber && p.idNumber);
   };
 
+  const validatePayment = () => {
+    if (paymentMethod === 'momo' || paymentMethod === 'orange_money') {
+      if (!paymentPhoneNumber || paymentPhoneNumber.length < 9) {
+        Alert.alert('Error', 'Please enter a valid mobile money number');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleCompleteBooking = async () => {
-    if (!validatePassengers()) {
-      Alert.alert('Error', 'Please fill in all passenger information');
+    if (!validatePassengers() || !validatePayment()) {
       return;
     }
 
+    setShowPaymentModal(true);
+    setPaymentStatus('processing');
+    setPaymentMessage('Connecting to payment provider...');
+
     try {
-      setLoading(true);
+      // 1. Simulate Connection delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // 2. Simulate User Approval Wait (e.g. USSD push)
+      if (paymentMethod !== 'card') {
+        setPaymentMessage(`Please check your phone (${paymentPhoneNumber}) to approve the transaction.`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } else {
+        setPaymentMessage('Processing card transaction...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      // 3. Call API
       const bookingData = {
         tripId,
         passengers,
         paymentMethod,
+        paymentDetails: {
+          phoneNumber: paymentPhoneNumber
+        }
       };
-      const result = await travelAPI.bookTrip(bookingData);
-      
-      Alert.alert('Success', 'Booking confirmed! Your e-ticket has been sent to your email.', [
-        {
-          text: 'View Booking',
-          onPress: () => navigation.navigate('BookingHistory'),
-        },
-      ]);
+      // const result = await travelAPI.bookTrip(bookingData); // Uncomment when ready
+
+      // 4. Success State
+      setPaymentStatus('success');
+      setPaymentMessage('Booking confirmed successfully!');
+
+      // 5. Navigate away after success animation
+      setTimeout(() => {
+        setShowPaymentModal(false);
+        navigation.navigate('BookingHistory'); // Or a dedicated Success Screen
+      }, 2000);
+
     } catch (error) {
       console.error('Booking error:', error);
-      Alert.alert('Error', 'Failed to complete booking');
-    } finally {
-      setLoading(false);
+      setPaymentStatus('failed');
+      setPaymentMessage('Transaction failed. Please try again.');
+      setTimeout(() => setShowPaymentModal(false), 3000);
     }
   };
 
-  const totalPrice = trip ? passengers.length * trip.pricePerSeat : 0;
+  const totalPrice = trip ? passengers.length * trip.pricePerSeat : 0; // Note: Trip is currently null init, needs fetching or passed param
 
   return (
     <SafeAreaView style={styles.container}>
+      <PaymentProcessingModal
+        visible={showPaymentModal}
+        status={paymentStatus}
+        message={paymentMessage}
+      />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -116,11 +164,18 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                   currentStep >= step && styles.progressDotActive,
                 ]}
               >
-                <Ionicons
-                  name={currentStep > step ? 'checkmark' : String(step)}
-                  size={16}
-                  color={currentStep >= step ? '#FFFFFF' : theme.colors.neutral[400]}
-                />
+                {currentStep > step ? (
+                  <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                ) : (
+                  <Text
+                    style={[
+                      styles.progressLabel,
+                      { color: currentStep >= step ? '#FFFFFF' : theme.colors.neutral[400] },
+                    ]}
+                  >
+                    {step}
+                  </Text>
+                )}
               </View>
               <Text
                 style={[
@@ -143,7 +198,7 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                 <View style={styles.passengerHeader}>
                   <Text style={styles.passengerLabel}>Passenger {index + 1}</Text>
                   {passengers.length > 1 && (
-                    <TouchableOpacity onPress={() => handleRemovePassenger(passenger.id)}>
+                    <TouchableOpacity onPress={() => handleRemovePassenger(passenger.id!)}>
                       <Ionicons name="trash" size={20} color={theme.colors.status.error} />
                     </TouchableOpacity>
                   )}
@@ -155,8 +210,8 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                     style={styles.input}
                     placeholder="Enter full name"
                     placeholderTextColor={theme.colors.neutral[400]}
-                    value={passenger.name}
-                    onChangeText={text => handlePassengerUpdate(passenger.id, 'name', text)}
+                    value={passenger.name || ''}
+                    onChangeText={text => handlePassengerUpdate(passenger.id!, 'name', text)}
                   />
                 </View>
 
@@ -167,8 +222,8 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                     placeholder="Enter email"
                     placeholderTextColor={theme.colors.neutral[400]}
                     keyboardType="email-address"
-                    value={passenger.email}
-                    onChangeText={text => handlePassengerUpdate(passenger.id, 'email', text)}
+                    value={passenger.email || ''}
+                    onChangeText={text => handlePassengerUpdate(passenger.id!, 'email', text)}
                   />
                 </View>
 
@@ -179,8 +234,8 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                     placeholder="Enter phone number"
                     placeholderTextColor={theme.colors.neutral[400]}
                     keyboardType="phone-pad"
-                    value={passenger.phoneNumber}
-                    onChangeText={text => handlePassengerUpdate(passenger.id, 'phoneNumber', text)}
+                    value={passenger.phoneNumber || ''}
+                    onChangeText={text => handlePassengerUpdate(passenger.id!, 'phoneNumber', text)}
                   />
                 </View>
 
@@ -190,8 +245,8 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                     style={styles.input}
                     placeholder="National ID, Passport, etc"
                     placeholderTextColor={theme.colors.neutral[400]}
-                    value={passenger.idNumber}
-                    onChangeText={text => handlePassengerUpdate(passenger.id, 'idNumber', text)}
+                    value={passenger.idNumber || ''}
+                    onChangeText={text => handlePassengerUpdate(passenger.id!, 'idNumber', text)}
                   />
                 </View>
               </View>
@@ -246,12 +301,36 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
                     {method === 'momo'
                       ? 'Quick and secure mobile payment'
                       : method === 'orange_money'
-                      ? 'Orange Money wallet'
-                      : 'Credit/Debit card'}
+                        ? 'Orange Money wallet'
+                        : 'Credit/Debit card'}
                   </Text>
                 </View>
               </TouchableOpacity>
             ))}
+
+            {/* Payment Details Input */}
+            {(paymentMethod === 'momo' || paymentMethod === 'orange_money') && (
+              <View style={styles.paymentDetailsContainer}>
+                <Text style={styles.label}>Mobile Money Number *</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="phone-portrait-outline" size={20} color={theme.colors.neutral[400]} />
+                  <TextInput
+                    style={[styles.input, { flex: 1, borderWidth: 0 }]}
+                    placeholder="6 XX XX XX XX"
+                    placeholderTextColor={theme.colors.neutral[400]}
+                    keyboardType="phone-pad"
+                    value={paymentPhoneNumber}
+                    onChangeText={setPaymentPhoneNumber}
+                  />
+                </View>
+              </View>
+            )}
+
+            {paymentMethod === 'card' && (
+              <View style={styles.paymentDetailsContainer}>
+                <Text style={styles.helperText}>Card payment simulation (No real details needed for demo)</Text>
+              </View>
+            )}
 
             {/* Booking Summary */}
             <View style={styles.summaryCard}>
@@ -292,16 +371,9 @@ export default function BookingScreen({ route, navigation }: Props): React.JSX.E
               <TouchableOpacity
                 style={styles.confirmButton}
                 onPress={handleCompleteBooking}
-                disabled={loading}
               >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <>
-                    <Ionicons name="checkmark-done" size={20} color="#FFFFFF" />
-                    <Text style={styles.confirmButtonText}>Confirm Booking</Text>
-                  </>
-                )}
+                <Ionicons name="checkmark-done" size={20} color="#FFFFFF" />
+                <Text style={styles.confirmButtonText}>Confirm Booking</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -557,5 +629,28 @@ const styles = StyleSheet.create({
     ...theme.typography.styles.body,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  paymentDetailsContainer: {
+    marginBottom: theme.spacing.lg,
+    padding: theme.spacing.md,
+    backgroundColor: '#FFFFFF',
+    borderRadius: theme.borderRadius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[300],
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.md,
+    height: 48,
+    backgroundColor: theme.colors.background.default,
+  },
+  helperText: {
+    ...theme.typography.styles.caption,
+    color: theme.colors.text.secondary,
+    fontStyle: 'italic',
   },
 });

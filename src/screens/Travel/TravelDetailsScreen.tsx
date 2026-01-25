@@ -216,7 +216,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         </View>
 
         {/* AI Departure Prediction */}
-        {/* Prediction section omitted; backend format differs */}
+        {trip.depturePrediction && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>AI Departure Prediction</Text>
             

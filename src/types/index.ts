@@ -36,6 +36,64 @@ export interface UserProfile {
   gender?: 'male' | 'female' | 'other';
 }
 
+export interface UpdateUserProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  profilePhoto?: string;
+  dateOfBirth?: Date;
+  gender?: 'male' | 'female' | 'other';
+}
+
+export interface UserPreferenceRequest {
+  language?: 'en' | 'fr';
+  currency?: 'XAF' | 'USD' | 'EUR';
+  notificationSettings?: {
+    pushEnabled?: boolean;
+    emailEnabled?: boolean;
+    smsEnabled?: boolean;
+    departureAlerts?: boolean;
+    promotions?: boolean;
+  };
+  privacySettings?: {
+    shareLocation?: boolean;
+    shareActivity?: boolean;
+    dataCollection?: boolean;
+  };
+  accessibility?: {
+    fontSize?: 'small' | 'medium' | 'large';
+    highContrast?: boolean;
+    voiceOverEnabled?: boolean;
+  };
+}
+
+export interface LocationTrackRequest {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  activityType: 'traveling' | 'browsing' | 'idle';
+}
+
+export interface LocationTrackResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface VerifyTokenResponse {
+  valid: boolean;
+  user?: User;
+  message?: string;
+}
+
+export interface DeviceSessionList {
+  sessions: DeviceSession[];
+}
+
+export interface MessageResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface UserPreferences {
   userId: string;
   language: 'en' | 'fr';
@@ -160,11 +218,15 @@ export interface Trip {
 }
 
 export interface Passenger {
-  firstName: string;
-  lastName: string;
+  id?: string;
+  name?: string; // Full name
+  firstName?: string;
+  lastName?: string;
+  email?: string; // Contact email
   age?: number;
   idNumber?: string;
   phoneNumber?: string;
+  seatNumber?: number;
 }
 
 export interface Booking {
@@ -415,43 +477,43 @@ export interface AttractionSearchResponse {
 }
 
 // User API Types
-export interface UpdateUserProfileRequest {
+export interface ApiUpdateUserProfileRequest {
   display_name?: string;
   language?: string;
   notification_enabled?: boolean;
 }
 
-export interface UserPreferenceRequest {
+export interface ApiUserPreferenceRequest {
   language?: string;
   marketing_opt_in?: boolean;
   travel_notifications?: boolean;
   security_alerts?: boolean;
 }
 
-export interface LocationTrackRequest {
+export interface ApiLocationTrackRequest {
   latitude: number;
   longitude: number;
   accuracy_meters?: number;
   activity_type?: string;
 }
 
-export interface LocationTrackResponse {
+export interface ApiLocationTrackResponse {
   location_id: string;
   device_ip: string;
   recorded_at: string;
 }
 
-export interface VerifyTokenResponse {
+export interface ApiVerifyTokenResponse {
   uid: string;
   role: string;
   status?: string;
 }
 
-export interface DeviceSessionList {
+export interface ApiDeviceSessionList {
   sessions: DeviceSession[];
 }
 
-export interface MessageResponse {
+export interface ApiMessageResponse {
   message: string;
 }
 

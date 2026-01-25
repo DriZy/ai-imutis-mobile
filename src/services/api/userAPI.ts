@@ -1,15 +1,15 @@
 import apiClient from './config';
-import { 
-  UserProfile, 
-  UserPreferences, 
+import {
+  UserProfile,
+  UserPreferences,
   DeviceSession,
-  UpdateUserProfileRequest,
-  UserPreferenceRequest,
-  LocationTrackRequest,
-  LocationTrackResponse,
-  VerifyTokenResponse,
-  DeviceSessionList,
-  MessageResponse
+  ApiUpdateUserProfileRequest as UpdateUserProfileRequest,
+  ApiUserPreferenceRequest as UserPreferenceRequest,
+  ApiLocationTrackRequest as LocationTrackRequest,
+  ApiLocationTrackResponse as LocationTrackResponse,
+  ApiVerifyTokenResponse as VerifyTokenResponse,
+  ApiDeviceSessionList as DeviceSessionList,
+  ApiMessageResponse as MessageResponse
 } from '../../types';
 
 // User API Service

@@ -1,8 +1,8 @@
 import apiClient from './config';
-import { 
-  SearchQuery, 
-  Trip, 
-  Booking, 
+import {
+  SearchQuery,
+  Trip,
+  Booking,
   ApiResponse,
   TravelSearchRequest,
   TravelSearchResponse,
@@ -61,6 +61,24 @@ const travelAPI = {
     };
     const response = await apiClient.post<TravelBookingResponse>('/api/travels/book', request);
     return response.data;
+  },
+
+  // Get booking history
+  async getBookingHistory(): Promise<{ bookings: Booking[] }> {
+    // Mock implementation or real API call
+    const response = await apiClient.get<{ bookings: Booking[] }>('/api/bookings/history');
+    return response.data;
+  },
+
+  // Cancel booking
+  async cancelBooking(bookingId: string): Promise<void> {
+    await apiClient.post(`/api/bookings/${bookingId}/cancel`);
+  },
+
+  // Download ticket
+  async downloadTicket(bookingId: string): Promise<string> {
+    const response = await apiClient.get<{ url: string }>(`/api/bookings/${bookingId}/ticket`);
+    return response.data.url;
   },
 };
 

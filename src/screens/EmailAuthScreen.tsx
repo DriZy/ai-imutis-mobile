@@ -52,7 +52,7 @@ export default function EmailAuthScreen({ navigation }: Props): React.JSX.Elemen
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      navigation.navigate('MainTabs' as any);
+      // navigation handled automatically by AppNavigator state change
     } catch (error) {
       let errorMessage = 'An error occurred';
       if (error instanceof Object && 'code' in error && typeof error.code === 'string') {
@@ -66,6 +66,19 @@ export default function EmailAuthScreen({ navigation }: Props): React.JSX.Elemen
           errorMessage = 'Incorrect password';
         }
       }
+
+      console.log('Context[EmailAuth] Error:', error);
+
+
+      // DEBUG: Show actual error for unhandled cases
+      if (errorMessage === 'An error occurred' && error instanceof Object && 'code' in error) {
+        errorMessage = `Error: ${(error as any).code}\n${(error as any).message}`;
+      } else if (errorMessage === 'An error occurred') {
+        errorMessage = `Unexpected Error: ${JSON.stringify(error)}`;
+      }
+
+      Alert.alert('Error', errorMessage);
+
       Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);

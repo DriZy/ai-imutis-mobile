@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -19,18 +19,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { logout, updateProfile } from '../../store/slices/authSlice';
 import userAPI from '../../services/api/userAPI';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Profile'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'ProfileScreen'>;
 
 export default function ProfileScreen({ navigation }: Props): React.JSX.Element {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState<Partial<UserProfile>>({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    firstName: user?.displayName?.split(' ')[0] || '',
+    lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
     email: user?.email || '',
     phoneNumber: user?.phoneNumber || '',
   });
@@ -43,7 +44,17 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
 
     try {
       setLoading(true);
-      await userAPI.updateProfile(formData);
+
+      /**
+       * ADJUSTMENT: Map local state to ApiUpdateUserProfileRequest.
+       * Based on your types, the API only accepts 'display_name', 'language', and 'notification_enabled'.
+       */
+      await userAPI.updateProfile({
+        display_name: `${formData.firstName} ${formData.lastName}`,
+        // language and notification_enabled are optional, leaving them out for now
+      });
+
+      // Update local Redux state with the split names
       dispatch(updateProfile(formData));
       setIsEditing(false);
       Alert.alert('Success', 'Profile updated successfully');
@@ -57,14 +68,14 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', onPress: () => {} },
+      { text: 'Cancel', onPress: () => { } },
       {
         text: 'Logout',
         onPress: async () => {
           try {
             await auth.signOut();
             dispatch(logout());
-            navigation.navigate('Login');
+            navigation.navigate('Auth');
           } catch (error) {
             console.error('Logout error:', error);
           }
@@ -82,18 +93,18 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
           <View style={styles.profileSection}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                {user?.displayName?.charAt(0).toUpperCase() || '?'}
               </Text>
             </View>
             <View style={styles.userInfo}>
               <Text style={styles.userName}>
-                {user?.firstName} {user?.lastName}
+                {user?.displayName || 'User'}
               </Text>
               <Text style={styles.userEmail}>{user?.email}</Text>
             </View>
             {!isEditing && (
               <TouchableOpacity onPress={() => setIsEditing(true)}>
-                <Ionicons name="pencil" size={24} color={theme.colors.primary.main} />
+                <Ionicons name="pencil" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             )}
           </View>
@@ -102,7 +113,7 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
         {/* Profile Form */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
-          
+
           <View style={styles.formGroup}>
             <Text style={styles.label}>First Name</Text>
             <TextInput
@@ -171,8 +182,8 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
                 onPress={() => {
                   setIsEditing(false);
                   setFormData({
-                    firstName: user?.firstName || '',
-                    lastName: user?.lastName || '',
+                    firstName: user?.displayName?.split(' ')[0] || '',
+                    lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
                     email: user?.email || '',
                     phoneNumber: user?.phoneNumber || '',
                   });
@@ -188,7 +199,7 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
         <View style={styles.section}>
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={() => navigation.navigate('SettingsScreen')}
           >
             <Ionicons name="settings" size={24} color={theme.colors.primary.main} />
             <Text style={styles.menuText}>Settings</Text>
@@ -199,14 +210,14 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
             style={styles.menuItem}
             onPress={() => navigation.navigate('SessionManager')}
           >
-            <Ionicons name="lock" size={24} color={theme.colors.primary.main} />
+            <Ionicons name="shield-checkmark" size={24} color={theme.colors.primary.main} />
             <Text style={styles.menuText}>Active Sessions</Text>
             <Ionicons name="chevron-forward" size={24} color={theme.colors.neutral[400]} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('SavedAddresses')}
+            onPress={() => {/* TODO: Navigate to Saved Addresses */ }}
           >
             <Ionicons name="location" size={24} color={theme.colors.primary.main} />
             <Text style={styles.menuText}>Saved Addresses</Text>
@@ -215,7 +226,7 @@ export default function ProfileScreen({ navigation }: Props): React.JSX.Element 
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('PaymentMethods')}
+            onPress={() => {/* TODO: Navigate to Payment Methods */ }}
           >
             <Ionicons name="card" size={24} color={theme.colors.primary.main} />
             <Text style={styles.menuText}>Payment Methods</Text>
@@ -389,4 +400,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.status.error,
   },
-});
+})

@@ -16,12 +16,17 @@ import PhoneAuthScreen from '../screens/PhoneAuthScreen';
 import GoogleAuthScreen from '../screens/GoogleAuthScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import SearchScreen from '../screens/Travel/SearchScreen';
+import TravelTabScreen from '../screens/Travel/TravelTabScreen';
 import CityPickerScreen from '../screens/Travel/CityPickerScreen';
 import TravelResultsScreen from '../screens/Travel/TravelResultsScreen';
 import MapHomeScreen from '../screens/Map/MapHomeScreen';
 import TravelDetailsScreen from '../screens/Travel/TravelDetailsScreen';
 import BookingScreen from '../screens/Travel/BookingScreen';
 import BookingHistoryScreen from '../screens/Travel/BookingHistoryScreen';
+import NotificationsTabScreen from '../screens/Notifications/NotificationsTabScreen';
+import ProfileTabScreen from '../screens/Profile/ProfileTabScreen';
+import EditProfileScreen from '../screens/Profile/EditProfileScreen';
+import TourismTabScreen from '../screens/Tourism/TourismTabScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -42,6 +47,7 @@ export type RootStackParamList = {
   AttractionDetail: { attractionId: string };
   SavedAttractions: undefined;
   ProfileScreen: undefined;
+  EditProfile: undefined;
   SettingsScreen: undefined;
   SessionManager: undefined;
   NotificationsScreen: undefined;
@@ -86,7 +92,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Travel"
-        component={SearchScreen}
+        component={TravelTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bus" size={size} color={color} />
@@ -95,16 +101,16 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Tourism"
-        component={DashboardScreen} // Temporary - will be replaced with CitiesScreen
+        component={TourismTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map" size={size} color={color} />
+            <Ionicons name="images" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
         name="Notifications"
-        component={DashboardScreen} // Temporary - will be replaced with NotificationsScreen
+        component={NotificationsTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" size={size} color={color} />
@@ -113,7 +119,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Profile"
-        component={DashboardScreen} // Temporary - will be replaced with ProfileScreen
+        component={ProfileTabScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
@@ -152,6 +158,7 @@ export default function AppNavigator(): React.JSX.Element {
         {user ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="TravelSearch" component={SearchScreen} />
             <Stack.Screen name="CityPicker" component={CityPickerScreen} />

@@ -54,29 +54,40 @@ apiClient.interceptors.response.use(
     // Handle 401 Unauthorized - Token expired
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       // Clear auth token and redirect to login
       await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      // Trigger logout action (implement in your auth service)
-      
+
+      // Emit error for UI
+      import('../../utils/events/EventEmitter').then(({ eventEmitter, EVENTS }) => {
+        eventEmitter.emit(EVENTS.API_ERROR, 'Session expired. Please login again.');
+      });
+
       return Promise.reject(error);
     }
 
     // Handle other errors
+    let errorMessage = 'An unexpected error occurred';
+
     if (error.response) {
       // Server responded with error status
-      const message = error.response.data?.message || 'Server error occurred';
-      console.error('API Error:', message);
-      return Promise.reject(new Error(message));
+      errorMessage = (error.response.data as any)?.message || 'Server error occurred';
     } else if (error.request) {
       // Request made but no response
-      console.error('Network Error:', error.message);
-      return Promise.reject(new Error('Network connection error. Please check your internet.'));
+      errorMessage = 'Network connection error. Please check your internet.';
     } else {
       // Something else happened
-      console.error('Error:', error.message);
-      return Promise.reject(error);
+      errorMessage = (error as Error).message;
     }
+
+    // Emit event for global toast
+    // Dynamic import to avoid circular dependency issues if any
+    import('../../utils/events/EventEmitter').then(({ eventEmitter, EVENTS }) => {
+      eventEmitter.emit(EVENTS.API_ERROR, errorMessage);
+    });
+
+    console.error('API Error details:', errorMessage);
+    return Promise.reject(new Error(errorMessage));
   }
 );
 
@@ -98,7 +109,7 @@ export const retryRequest = async <T>(
   maxRetries: number = API_CONFIG.RETRY_ATTEMPTS
 ): Promise<T> => {
   let lastError: Error | null = null;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await requestFn();
@@ -110,6 +121,6 @@ export const retryRequest = async <T>(
       }
     }
   }
-  
+
   throw lastError;
 };
