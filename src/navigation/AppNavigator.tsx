@@ -22,6 +22,8 @@ import MapHomeScreen from '../screens/Map/MapHomeScreen';
 import TravelDetailsScreen from '../screens/Travel/TravelDetailsScreen';
 import BookingScreen from '../screens/Travel/BookingScreen';
 import BookingHistoryScreen from '../screens/Travel/BookingHistoryScreen';
+import VehicleRegistrationScreen from '../screens/Travel/VehicleRegistrationScreen';
+import ScheduleRideScreen from '../screens/Travel/ScheduleRideScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -37,6 +39,8 @@ export type RootStackParamList = {
   TravelDetails: { tripId: string };
   Booking: { tripId: string };
   BookingHistory: undefined;
+  VehicleRegistration: undefined;
+  ScheduleRide: undefined;
   CitiesScreen: undefined;
   AttractionsScreen: { cityId: string };
   AttractionDetail: { attractionId: string };
@@ -159,6 +163,8 @@ export default function AppNavigator(): React.JSX.Element {
             <Stack.Screen name="TravelDetails" component={TravelDetailsScreen} />
             <Stack.Screen name="Booking" component={BookingScreen} />
             <Stack.Screen name="BookingHistory" component={BookingHistoryScreen} />
+            <Stack.Screen name="VehicleRegistration" component={VehicleRegistrationScreen} />
+            <Stack.Screen name="ScheduleRide" component={ScheduleRideScreen} />
           </>
         ) : (
           <>

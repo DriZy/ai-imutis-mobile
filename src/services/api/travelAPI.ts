@@ -11,7 +11,13 @@ import {
   TravelEstimateResponse,
   TravelBookingRequest,
   TravelBookingResponse,
-  TravelSummary
+  TravelSummary,
+  Vehicle,
+  VehicleRegistrationRequest,
+  VehicleRegistrationResponse,
+  RideSchedule,
+  RideScheduleCreateRequest,
+  RideScheduleCreateResponse,
 } from '../../types';
 
 // Travel API Service
@@ -61,6 +67,30 @@ const travelAPI = {
     };
     const response = await apiClient.post<TravelBookingResponse>('/api/travels/book', request);
     return response.data;
+  },
+
+  // Register a vehicle with minimal data
+  async registerVehicle(payload: VehicleRegistrationRequest): Promise<VehicleRegistrationResponse> {
+    const response = await apiClient.post<VehicleRegistrationResponse>('/api/vehicles/register', payload);
+    return response.data;
+  },
+
+  // List vehicles for the authenticated user
+  async getMyVehicles(): Promise<Vehicle[]> {
+    const response = await apiClient.get<Vehicle[]>('/api/vehicles/mine');
+    return response.data || [];
+  },
+
+  // Create a ride schedule for a vehicle
+  async createRideSchedule(payload: RideScheduleCreateRequest): Promise<RideScheduleCreateResponse> {
+    const response = await apiClient.post<RideScheduleCreateResponse>('/api/rides/schedules', payload);
+    return response.data;
+  },
+
+  // List ride schedules created by the authenticated user
+  async getMyRideSchedules(): Promise<RideSchedule[]> {
+    const response = await apiClient.get<RideSchedule[]>('/api/rides/schedules/mine');
+    return response.data || [];
   },
 };
 

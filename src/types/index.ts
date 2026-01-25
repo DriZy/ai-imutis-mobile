@@ -292,6 +292,8 @@ export interface TravelState {
   searchResults: Trip[];
   selectedTrip: Trip | null;
   bookings: Booking[];
+  vehicles: Vehicle[];
+  rideSchedules: RideSchedule[];
   isLoading: boolean;
   error: string | null;
 }
@@ -539,5 +541,60 @@ export interface TravelPatternInsight {
   trend: string;
   confidence: number;
   commentary: string;
+}
+
+// ===== Driver/Vehicle & Scheduling Types =====
+export interface Vehicle {
+  id: string;
+  ownerId: string;
+  type: 'minibus' | 'bus' | 'taxi';
+  plateNumber: string;
+  seats: number;
+  make?: string;
+  model?: string;
+  color?: string;
+  createdAt?: string;
+}
+
+export interface VehicleRegistrationRequest {
+  type: 'minibus' | 'bus' | 'taxi';
+  plate_number: string;
+  seats: number;
+  make?: string;
+  model?: string;
+  color?: string;
+}
+
+export interface VehicleRegistrationResponse {
+  vehicle_id: string;
+  status: 'created' | 'exists' | 'updated';
+}
+
+export interface RideSchedule {
+  id: string;
+  vehicleId: string;
+  origin: string; // city name or code
+  destination: string; // city name or code
+  departure_time: string; // ISO datetime
+  total_seats: number;
+  available_seats: number;
+  price_per_seat: number;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface RideScheduleCreateRequest {
+  vehicle_id: string;
+  origin: string;
+  destination: string;
+  departure_time: string;
+  total_seats: number;
+  price_per_seat: number;
+  notes?: string;
+}
+
+export interface RideScheduleCreateResponse {
+  schedule_id: string;
+  status: 'created' | 'updated';
 }
 

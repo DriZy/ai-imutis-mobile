@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TravelState, SearchQuery, Trip, Booking } from '../../types';
+import { TravelState, SearchQuery, Trip, Booking, Vehicle, RideSchedule } from '../../types';
 
 const initialState: TravelState = {
   searchQuery: null,
   searchResults: [],
   selectedTrip: null,
   bookings: [],
+  vehicles: [],
+  rideSchedules: [],
   isLoading: false,
   error: null,
 };
@@ -37,6 +39,18 @@ const travelSlice = createSlice({
         state.bookings[index] = action.payload;
       }
     },
+    setVehicles: (state, action: PayloadAction<Vehicle[]>) => {
+      state.vehicles = action.payload;
+    },
+    addVehicle: (state, action: PayloadAction<Vehicle>) => {
+      state.vehicles.unshift(action.payload);
+    },
+    setRideSchedules: (state, action: PayloadAction<RideSchedule[]>) => {
+      state.rideSchedules = action.payload;
+    },
+    addRideSchedule: (state, action: PayloadAction<RideSchedule>) => {
+      state.rideSchedules.unshift(action.payload);
+    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -58,6 +72,10 @@ export const {
   setBookings,
   addBooking,
   updateBooking,
+  setVehicles,
+  addVehicle,
+  setRideSchedules,
+  addRideSchedule,
   setLoading,
   setError,
   clearSearchResults,
