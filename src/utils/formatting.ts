@@ -20,12 +20,12 @@ export const formatDistance = (meters: number): string => {
 export const formatPhoneNumber = (phone: string): string => {
   // Remove all non-digit characters
   const cleaned = phone.replace(/\D/g, '');
-  
+
   // Cameroon phone numbers: +237 XXX XXX XXX
   if (cleaned.startsWith('237')) {
     return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
   }
-  
+
   return phone;
 };
 
@@ -60,4 +60,9 @@ export const formatDeviceIP = (ip: string): string => {
     return `${parts[0]}.${parts[1]}.***.***`;
   }
   return ip;
+};
+
+// Format Time (HH:MM)
+export const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };

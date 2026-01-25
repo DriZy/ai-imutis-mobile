@@ -83,6 +83,16 @@ export default function SearchScreen({ navigation }: Props): React.JSX.Element {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Search Travel</Text>
           <Text style={styles.headerSubtitle}>Find your next journey</Text>
+          <View style={styles.driverActions}>
+            <TouchableOpacity style={styles.driverBtn} onPress={() => navigation.navigate('VehicleRegistration')}>
+              <Ionicons name="car" size={16} color="#fff" />
+              <Text style={styles.driverBtnText}>Register Vehicle</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.driverBtnOutline} onPress={() => navigation.navigate('ScheduleRide')}>
+              <Ionicons name="time" size={16} color={theme.colors.primary.main} />
+              <Text style={styles.driverBtnOutlineText}>Schedule Ride</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Origin/Destination Section */}
@@ -213,6 +223,33 @@ const styles = StyleSheet.create({
     ...theme.typography.styles.body,
     color: theme.colors.text.secondary,
   },
+  driverActions: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.md,
+  },
+  driverBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: theme.colors.primary.main,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: theme.borderRadius.lg,
+  },
+  driverBtnText: { ...theme.typography.styles.bodySmall, color: '#fff', fontWeight: '700' },
+  driverBtnOutline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: theme.borderRadius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.primary.main,
+  },
+  driverBtnOutlineText: { ...theme.typography.styles.bodySmall, color: theme.colors.primary.main, fontWeight: '700' },
   locationSection: {
     marginBottom: theme.spacing.lg,
   },

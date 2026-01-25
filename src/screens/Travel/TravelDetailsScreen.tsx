@@ -150,7 +150,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         {/* Trip Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Trip Information</Text>
-          
+
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <View style={styles.infoLeft}>
@@ -185,7 +185,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         {/* Vehicle Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Vehicle Details</Text>
-          
+
           <View style={styles.vehicleCard}>
             <View style={styles.vehicleHeader}>
               <View>
@@ -193,7 +193,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
                 <Text style={styles.vehicleReg}>Seats: {detail.available_seats}</Text>
               </View>
               <View style={styles.seatsInfo}>
-                <Ionicons name="seat" size={24} color={theme.colors.primary.main} />
+                <Ionicons name="bus" size={24} color={theme.colors.primary.main} />
                 <Text style={styles.seatsText}>{detail.available_seats}</Text>
               </View>
             </View>
@@ -216,10 +216,10 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         </View>
 
         {/* AI Departure Prediction */}
-        {trip.depturePrediction && (
+        {detail.departurePrediction && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>AI Departure Prediction</Text>
-            
+
             <View style={styles.predictionCard}>
               <View style={styles.predictionIcon}>
                 <Ionicons name="bulb" size={32} color="#FFB800" />
@@ -227,24 +227,24 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
               <View style={styles.predictionContent}>
                 <Text style={styles.predictionTitle}>Estimated Departure</Text>
                 <Text style={styles.predictionTime}>
-                  {formatTime(new Date(trip.depturePrediction.estimatedDepartureTime))}
+                  {formatTime(new Date(detail.departurePrediction.estimatedDepartureTime))}
                 </Text>
                 <View style={styles.confidenceBar}>
                   <View
                     style={[
                       styles.confidenceFill,
-                      { width: `${trip.depturePrediction.confidence * 100}%` },
+                      { width: `${detail.departurePrediction.confidence * 100}%` },
                     ]}
                   />
                 </View>
                 <Text style={styles.confidenceText}>
-                  {Math.round(trip.depturePrediction.confidence * 100)}% confidence
+                  {Math.round(detail.departurePrediction.confidence * 100)}% confidence
                 </Text>
               </View>
             </View>
 
             <View style={styles.factorsContainer}>
-              {Object.entries(trip.depturePrediction.factors).map(([key, value]) => (
+              {Object.entries(detail.departurePrediction.factors).map(([key, value]) => (
                 <View key={key} style={styles.factorItem}>
                   <Text style={styles.factorLabel}>{key.replace(/([A-Z])/g, ' $1').trim()}</Text>
                   <Text style={styles.factorValue}>{value}</Text>
@@ -255,23 +255,23 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
         )}
 
         {/* Real-time Traffic */}
-        {trip.currentTraffic && (
+        {detail.currentTraffic && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Current Traffic</Text>
-            
+
             <View style={[
               styles.trafficCard,
-              { backgroundColor: getTrafficColor(trip.currentTraffic.status) + '20' }
+              { backgroundColor: getTrafficColor(detail.currentTraffic.status) + '20' }
             ]}>
               <Ionicons
                 name="warning"
                 size={24}
-                color={getTrafficColor(trip.currentTraffic.status)}
+                color={getTrafficColor(detail.currentTraffic.status)}
               />
               <View style={styles.trafficContent}>
-                <Text style={styles.trafficStatus}>{trip.currentTraffic.status.toUpperCase()}</Text>
+                <Text style={styles.trafficStatus}>{detail.currentTraffic.status.toUpperCase()}</Text>
                 <Text style={styles.trafficDescription}>
-                  {trip.currentTraffic.description || 'Monitor route conditions'}
+                  {detail.currentTraffic.description || 'Monitor route conditions'}
                 </Text>
               </View>
             </View>
@@ -283,7 +283,7 @@ export default function TravelDetailsScreen({ route, navigation }: Props): React
       <View style={styles.actionBar}>
         <TouchableOpacity
           style={styles.bookButton}
-          onPress={() => navigation.navigate('Booking', { tripId: trip.id })}
+          onPress={() => navigation.navigate('Booking', { tripId: detail.id })}
         >
           <Ionicons name="ticket" size={20} color="#FFFFFF" />
           <Text style={styles.bookButtonText}>Book Now</Text>
