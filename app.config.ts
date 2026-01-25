@@ -9,7 +9,6 @@ export default {
     icon: "./assets/icon.png",
     userInterfaceStyle: "dark",
     scheme: "aiimutis",
-    newArchEnabled: false,
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",

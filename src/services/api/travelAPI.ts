@@ -69,9 +69,29 @@ const travelAPI = {
     return response.data;
   },
 
-  // Register a vehicle with minimal data
-  async registerVehicle(payload: VehicleRegistrationRequest): Promise<VehicleRegistrationResponse> {
-    const response = await apiClient.post<VehicleRegistrationResponse>('/api/vehicles/register', payload);
+  // Register a vehicle with minimal data and optional photo upload
+  async registerVehicle(payload: VehicleRegistrationRequest, photoUri?: string): Promise<VehicleRegistrationResponse> {
+    const formData = new FormData();
+    formData.append('type', payload.type);
+    formData.append('plate_number', payload.plate_number);
+    formData.append('seats', String(payload.seats));
+    if (payload.make) formData.append('make', payload.make);
+    if (payload.model) formData.append('model', payload.model);
+    if (payload.color) formData.append('color', payload.color);
+
+    if (photoUri) {
+      formData.append('photo', {
+        uri: photoUri,
+        name: `vehicle-${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      } as any); // React Native FormData expects file-like object
+    }
+
+    const response = await apiClient.post<VehicleRegistrationResponse>(
+      '/api/vehicles/register',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
     return response.data;
   },
 

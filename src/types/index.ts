@@ -553,6 +553,7 @@ export interface Vehicle {
   make?: string;
   model?: string;
   color?: string;
+  photoUrl?: string;
   createdAt?: string;
 }
 
@@ -563,6 +564,8 @@ export interface VehicleRegistrationRequest {
   make?: string;
   model?: string;
   color?: string;
+  // When sending as multipart/form-data, include the photo file separately; this optional URI is used client-side only.
+  photo_uri?: string;
 }
 
 export interface VehicleRegistrationResponse {
